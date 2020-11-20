@@ -1,0 +1,11 @@
+name: ''
+description: ''
+author: ''
+branding:
+  icon: ''
+  color: ''
+inputs:
+outputs:
+runs:
+  using: 'node12'
+  main: 'src/index.js'
