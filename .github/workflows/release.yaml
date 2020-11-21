@@ -1,0 +1,19 @@
+name: "Release"
+on:
+  push:
+    branches:
+      - master
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Committing compiled
+      run: |
+        yarn
+        yarn package
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add dist/index.js
+        git commit -m "bot: compilation" || echo "nothing to commit"
+        git push origin master

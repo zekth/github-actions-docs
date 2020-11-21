@@ -1,11 +1,29 @@
-name: ''
-description: ''
-author: ''
-branding:
-  icon: ''
-  color: ''
+name: 'Github Actions Docs'
+description: 'Automatically generate the documentation of your Github Action'
+author: 'Vincent LE GOFF <vince.legoff@gmail.com>'
 inputs:
+  display:
+    required: false
+    default: 'classic'
+    description: 'Output display format'
+  inputPath:
+    required: true
+    default: 'action.yml'
+    description: 'Path to the action.yml of the action you want to be documented'
+  mode:
+    required: false
+    default: 'output'
+    description: 'Mode of execution'
+  outputPath:
+    required: false
+    default: 'README.md'
+    description: 'File to modify in case of commit mode selected'
 outputs:
+  doc:
+    description: 'Generated documentation'
 runs:
   using: 'node12'
-  main: 'src/index.js'
+  main: 'dist/index.js'
+branding:
+  icon: 'book-open'
+  color: 'blue'
