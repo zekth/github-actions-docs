@@ -686,6 +686,13 @@ exports.issueCommand = issueCommand;
 
 /***/ }),
 
+/***/ 129:
+/***/ (function(module) {
+
+module.exports = require("child_process");
+
+/***/ }),
+
 /***/ 228:
 /***/ (function(module, __unusedexports, __webpack_require__) {
 
@@ -730,7 +737,7 @@ module.exports = new Type('tag:yaml.org,2002:bool', {
 /***/ }),
 
 /***/ 325:
-/***/ (function(__unusedmodule, __unusedexports, __webpack_require__) {
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
 
 "use strict";
 
@@ -743,28 +750,89 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-const fs = __webpack_require__(747);
-const path = __webpack_require__(622);
-const yaml = __webpack_require__(414);
-const core = __webpack_require__(470);
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const fs_1 = __webpack_require__(747);
+const child_process_1 = __webpack_require__(129);
+const js_yaml_1 = __webpack_require__(414);
+const core_1 = __importDefault(__webpack_require__(470));
 const START_TAG = '<!-- GHA START -->';
 const END_TAG = '<!-- GHA END -->';
-const DISPLAY = ['table', 'classic'];
-const MODE = ['commit', 'output'];
-function tableFormat() { }
-function classicFormat() { }
+var MODE;
+(function (MODE) {
+    MODE["commit"] = "commit";
+    MODE["output"] = "output";
+})(MODE || (MODE = {}));
+var DISPLAY;
+(function (DISPLAY) {
+    DISPLAY["table"] = "table";
+    DISPLAY["classic"] = "classic";
+})(DISPLAY || (DISPLAY = {}));
+function tableFormat(actionObject) {
+    let o = '';
+    return o;
+}
+function classicFormat(actionObject) {
+    let o = '';
+    return o;
+}
+function checkOutputFile(content) {
+    return content.indexOf(START_TAG) !== -1 && content.indexOf(END_TAG) !== -1;
+}
+function commitToRepo(content, outputPath) {
+    child_process_1.execSync(`\
+  git config --local user.name \${GITHUB_ACTOR}
+  git config --local user.email \${GITHUB_ACTOR}@users.noreply.github.com
+  git fetch --depth=1 origin +refs/tags/*:refs/tags/*
+  git commit -m "bot: GHA doc"
+  git add ${outputPath}
+  git push`);
+}
+function outputDoc(content) {
+    core_1.default.setOutput('doc', content);
+}
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const mode = core.getInput('mode', { required: true });
-        const display = core.getInput('display', { required: true });
-        const path = core.getInput('path', { required: true });
+        const mode = core_1.default.getInput('mode', { required: false });
+        const display = core_1.default.getInput('display', { required: true });
+        const inputPath = core_1.default.getInput('inputPath', { required: true });
+        const outputPath = core_1.default.getInput('outputPath', { required: false });
+        let outputFileContent, actionDoc, content;
+        if (!(mode in MODE))
+            return core_1.default.setFailed('Unknown mode');
+        if (!(display in DISPLAY))
+            return core_1.default.setFailed('Unknown display');
+        if (!fs_1.existsSync(inputPath))
+            return core_1.default.setFailed(`Input Path: ${inputPath} not found`);
+        actionDoc = js_yaml_1.safeLoad(fs_1.readFileSync(inputPath, 'utf-8'));
+        if (outputPath.length !== 0) {
+            if (!fs_1.existsSync(outputPath))
+                return core_1.default.setFailed(`Output Path: ${inputPath} not found`);
+            outputFileContent = fs_1.readFileSync(outputPath, 'utf-8');
+            if (!checkOutputFile(outputFileContent))
+                return core_1.default.setFailed('Unable to find tags in the Output file');
+        }
+        switch (display) {
+            case DISPLAY.classic:
+                content = classicFormat(actionDoc);
+                break;
+            case DISPLAY.table:
+                content = tableFormat(actionDoc);
+                break;
+        }
+        if (mode === MODE.commit)
+            return commitToRepo(content, outputPath);
+        if (mode === MODE.output)
+            return outputDoc(content);
     });
 }
 if (require.main === require.cache[eval('__filename')]) {
     main().catch((e) => {
-        core.error('Something terrible happened');
-        core.error(e);
-        core.setFailed(e);
+        core_1.default.error('Something terrible happened');
+        core_1.default.error(e);
+        core_1.default.setFailed(e);
     });
 }
 
