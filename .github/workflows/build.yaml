@@ -1,4 +1,4 @@
-name: "PR"
+name: 'PR'
 on:
   pull_request:
     branches:
@@ -7,4 +7,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
+      - uses: ./
+        id: doc
+      - run: echo ${{steps.doc.outputs.doc}}

@@ -35,13 +35,17 @@ enum DISPLAY {
 }
 
 function tableFormat(actionObject: actionContent): string {
-  let o = '';
-  return o;
+  const o = [];
+  o.push(...genInput(actionObject, DISPLAY.table));
+  o.push(...gentOutput(actionObject, DISPLAY.table));
+  return o.join('\n');
 }
 
 function classicFormat(actionObject: actionContent): string {
-  let o = '';
-  return o;
+  const o = [];
+  o.push(...genInput(actionObject, DISPLAY.classic));
+  o.push(...gentOutput(actionObject, DISPLAY.classic));
+  return o.join('\n');
 }
 
 function checkOutputFile(content: string): boolean {
@@ -98,4 +102,45 @@ if (require.main === module) {
     core.error(e);
     core.setFailed(e);
   });
+}
+
+function genInput(actionContent: actionContent, mode: DISPLAY.classic | DISPLAY.table) {
+  const output = [];
+  if (actionContent.inputs && Object.keys(actionContent.inputs).length !== 0) {
+    output.push(`## Inputs`);
+    for (const prop in actionContent.inputs) {
+      const i = actionContent.inputs[prop];
+      let defaultValue;
+      if (typeof i.default === 'string' && i.default.length === 0) {
+        defaultValue = `''`;
+      } else if (typeof i.default === 'number' && i.default === 0) {
+        defaultValue = 0;
+      } else if (!i.default) {
+        defaultValue = 'None';
+      } else {
+        defaultValue = i.default;
+      }
+      output.push(`- #### \`${prop}\`
+\t- **Description**: ${i.description}
+\t- **Required**: ${i.required ? 'Yes' : 'No'}
+\t- **Default Value**: ${defaultValue}
+`);
+    }
+    return output.join('\n');
+  }
+  return '';
+}
+function gentOutput(actionContent: actionContent, mode: DISPLAY.classic | DISPLAY.table) {
+  if (actionContent.outputs && Object.keys(actionContent.outputs).length !== 0) {
+    const output = [];
+    output.push(`## Outputs`);
+    for (const prop in actionContent.outputs) {
+      const o = actionContent.outputs[prop];
+      output.push(`- #### \`${prop}\`
+\t- **Description**: ${o.description}
+`);
+    }
+    return output.join('\n');
+  }
+  return '';
 }
