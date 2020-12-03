@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'fs';
 import { execSync } from 'child_process';
 import { safeLoad } from 'js-yaml';
-import core from '@actions/core';
+import { getInput, setOutput, setFailed } from '@actions/core';
 
 const START_TAG = '<!-- GHA START -->';
 const END_TAG = '<!-- GHA END -->';
@@ -63,26 +63,26 @@ function commitToRepo(content: string, outputPath: string): void {
 }
 
 function outputDoc(content: string) {
-  core.setOutput('doc', content);
+  setOutput('doc', content);
 }
 
 async function main(): Promise<void> {
-  const mode = core.getInput('mode', { required: false });
-  const display = core.getInput('display', { required: true });
-  const inputPath = core.getInput('inputPath', { required: true });
-  const outputPath = core.getInput('outputPath', { required: false });
+  const mode = getInput('mode', { required: false });
+  const display = getInput('display', { required: true });
+  const inputPath = getInput('inputPath', { required: true });
+  const outputPath = getInput('outputPath', { required: false });
   let outputFileContent: string, actionDoc: actionContent, content: string;
 
-  if (!(mode in MODE)) return core.setFailed('Unknown mode');
-  if (!(display in DISPLAY)) return core.setFailed('Unknown display');
+  if (!(mode in MODE)) return setFailed('Unknown mode');
+  if (!(display in DISPLAY)) return setFailed('Unknown display');
 
-  if (!existsSync(inputPath)) return core.setFailed(`Input Path: ${inputPath} not found`);
+  if (!existsSync(inputPath)) return setFailed(`Input Path: ${inputPath} not found`);
   actionDoc = safeLoad(readFileSync(inputPath, 'utf-8')) as actionContent;
 
   if (outputPath.length !== 0) {
-    if (!existsSync(outputPath)) return core.setFailed(`Output Path: ${inputPath} not found`);
+    if (!existsSync(outputPath)) return setFailed(`Output Path: ${inputPath} not found`);
     outputFileContent = readFileSync(outputPath, 'utf-8');
-    if (!checkOutputFile(outputFileContent)) return core.setFailed('Unable to find tags in the Output file');
+    if (!checkOutputFile(outputFileContent)) return setFailed('Unable to find tags in the Output file');
   }
   switch (display) {
     case DISPLAY.classic:
@@ -139,9 +139,8 @@ function gentOutput(actionContent: actionContent, mode: DISPLAY.classic | DISPLA
 
 if (require.main === module) {
   main().catch((e) => {
-    console.log(e);
-    core.error('Something terrible happened');
-    core.error(e);
-    core.setFailed(e);
+    console.error('Something terrible happened');
+    console.error(e);
+    setFailed(e);
   });
 }
