@@ -96,14 +96,6 @@ async function main(): Promise<void> {
   if (mode === MODE.output) return outputDoc(content!);
 }
 
-if (require.main === module) {
-  main().catch((e) => {
-    core.error('Something terrible happened');
-    core.error(e);
-    core.setFailed(e);
-  });
-}
-
 function genInput(actionContent: actionContent, mode: DISPLAY.classic | DISPLAY.table) {
   const output = [];
   if (actionContent.inputs && Object.keys(actionContent.inputs).length !== 0) {
@@ -121,10 +113,10 @@ function genInput(actionContent: actionContent, mode: DISPLAY.classic | DISPLAY.
         defaultValue = i.default;
       }
       output.push(`- #### \`${prop}\`
-\t- **Description**: ${i.description}
-\t- **Required**: ${i.required ? 'Yes' : 'No'}
-\t- **Default Value**: ${defaultValue}
-`);
+      \t- **Description**: ${i.description}
+      \t- **Required**: ${i.required ? 'Yes' : 'No'}
+      \t- **Default Value**: ${defaultValue}
+      `);
     }
     return output.join('\n');
   }
@@ -137,10 +129,19 @@ function gentOutput(actionContent: actionContent, mode: DISPLAY.classic | DISPLA
     for (const prop in actionContent.outputs) {
       const o = actionContent.outputs[prop];
       output.push(`- #### \`${prop}\`
-\t- **Description**: ${o.description}
-`);
+      \t- **Description**: ${o.description}
+      `);
     }
     return output.join('\n');
   }
   return '';
+}
+
+if (require.main === module) {
+  main().catch((e) => {
+    console.log(e);
+    core.error('Something terrible happened');
+    core.error(e);
+    core.setFailed(e);
+  });
 }
