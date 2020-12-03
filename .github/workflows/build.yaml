@@ -8,6 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+      - run: |
+          yarn
+          yarn format
+          yarn lint
+          yarn package
       - uses: ./
         id: doc
       - run: echo ${{steps.doc.outputs.doc}}
