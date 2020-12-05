@@ -36,15 +36,15 @@ enum DISPLAY {
 
 function tableFormat(actionObject: actionContent): string {
   const o = [];
-  o.push(...genInput(actionObject, DISPLAY.table));
-  o.push(...gentOutput(actionObject, DISPLAY.table));
+  o.push(genInput(actionObject, DISPLAY.table));
+  o.push(gentOutput(actionObject, DISPLAY.table));
   return o.join('\n');
 }
 
 function classicFormat(actionObject: actionContent): string {
   const o = [];
-  o.push(...genInput(actionObject, DISPLAY.classic));
-  o.push(...gentOutput(actionObject, DISPLAY.classic));
+  o.push(genInput(actionObject, DISPLAY.classic));
+  o.push(gentOutput(actionObject, DISPLAY.classic));
   return o.join('\n');
 }
 
